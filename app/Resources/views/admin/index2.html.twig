@@ -1,0 +1,347 @@
+{% extends 'layout/base.html.twig' %}
+{% block javascripts %}
+{{ parent() }}
+    <script>
+        $(function () {
+            $('.btn[data-target="#changeWindow"]').click(function () {
+                var siblings = $(this).parents().eq(0).siblings();
+                var id = $("#id"),
+                    nameQuestion = $("#nameQuestion"),
+                    answer1 = $("#answer1"),
+                    answer2 = $("#answer2"),
+                    answer3 = $("#answer3"),
+                    answer4 = $("#answer4"),
+                    answer5 = $("#answer5"),
+                    answer6 = $("#answer6"),
+                    ballAnswer1 = $("#ballAnswer1"),
+                    ballAnswer2 = $("#ballAnswer2"),
+                    ballAnswer3 = $("#ballAnswer3"),
+                    ballAnswer4 = $("#ballAnswer4"),
+                    ballAnswer5 = $("#ballAnswer5"),
+                    ballAnswer6 = $("#ballAnswer6"),
+                    questionDesc = $('#questionDesc');
+                    questionDesc.empty();
+                var elementText;
+
+
+                for (var index = 0; index < siblings.length; ++index) {
+                    elementText = siblings[index].innerText;
+
+                    switch (index) {
+                        case 0:
+                            id.val(elementText);
+                            break;
+                        case 1:
+                            nameQuestion.val(elementText);
+                            break;
+                        case 2:
+                            answer1.val(elementText);
+                            break;
+                        case 3:
+                            answer2.val(elementText);
+                            break;
+                        case 4:
+                            answer3.val(elementText);
+                            break;
+                        case 5:
+                            answer4.val(elementText);
+                            break;
+                        case 6:
+                            answer5.val(elementText);
+                            break;
+                        case 7:
+                            answer6.val(elementText);
+                            break;
+                        case 8:
+                            ballAnswer1.val(elementText);
+                            break;
+                        case 9:
+                            ballAnswer2.val(elementText);
+                            break;
+                        case 10:
+                            ballAnswer3.val(elementText);
+                            break;
+                        case 11:
+                            ballAnswer4.val(elementText);
+                            break;
+                        case 12:
+                            ballAnswer5.val(elementText);
+                            break;
+                        case 13:
+                            ballAnswer6.val(elementText);
+                            break;
+                    }
+                    if (index == 1) {
+                        questionDesc.append(elementText, " ");
+                    }
+                }
+            });
+            $('.btn[data-target="#deleteWindow"]').click(function() {
+                var siblings = $(this).parents().eq(0).siblings();
+                $('#deleteWindow form').attr('action', "/admin/" + siblings[0].innerText + "/delete")
+
+            });
+            $('#addButton').click(function() {
+                var changeWindow = $("#changeWindow");
+                $('#exampleModalLabel', changeWindow).text("Добавление нового вопроса к тесту");
+                $('#questionDesc', changeWindow).text("Пожалуйста, заполните необходимые поля");
+
+                $("#id").val(0);
+                changeWindow.modal();
+
+            });
+            $('#scalButton').click(function () {
+                var scalWindow = $("#scalWindow");
+                scalWindow.modal();
+            });
+        })
+    </script>
+{% endblock %}
+{% block content %}
+<div class="container-fluid m-auto">
+    <aside class="filter mb-4">
+        <form class="mb-2" action="{{ path("admin.changeTestAction", {"idTest": test.getNkey()}) }}" method="post">
+        <div class="input-group mt-3">
+            <span class="input-group-addon">
+                Название теста:
+            </span>
+                <input style="font-weight: bold; font-size: 110%" value="{{ test.ctestname }}" type="text" name="nameTest" id="testName" placeholder="Название теста!" class="form-control">
+            <span class="input-group-addon">
+                Инструкция к тесту:
+            </span>
+            <textarea style="font-weight: bold; font-size: 110%" class="form-control" name="test-desc" rows="2" placeholder="Инструкция / описание к тесту">{{ test.cmessage }}</textarea>
+                <span class="input-group-btn">
+                    <button style="height: 70px;font-weight: bold; font-size: 20px;" class="btn btn-secondary" id="saveTest" type="submit">сохранить</button>
+                </span>
+        </div>
+
+        </form>
+
+
+            <form class="form-inline d-md-inline" action="{{ path("admin.editAction", {"id": test.getNkey()}) }}">
+                <div class="input-group">
+                    <input class="form-control" type="search" name="nameQuestion" placeholder="по названию вопроса" value="{{ nameQuestion }}">
+                    <select name="keyQuestion" class="form-control">
+                        <option value="-1">Все вопросы (№)</option>
+                        {% for question in questionKeys %}
+                            {% if question.nkey == keyQuestion %}
+                                <option selected="selected" value="{{ question.nkey }}">№{{ question.nkey }}</option>
+                            {% else %}
+                                <option value="{{ question.nkey }}">№{{ question.nkey }}</option>
+                            {% endif %}
+                            {% endfor %}
+                    </select>
+                    <span class="input-group-btn"><input class="btn btn-primary" type="submit" value="поиск"></span>
+
+                </div>
+
+            </form>
+            <p class="mt-2">сортировка вопросов по: {{ knp_pagination_sortable(pagination, 'возрастанию / убыванию', 'question.cquestion') }}</p>
+        <div class="mt-3">
+            <button id="addButton" class="btn btn-success" type="button">добавить вопрос к тесту</button>
+            <button id="scalButton" class="btn btn-success" type="button">настройка шкал</button>
+        </div>
+    </aside>
+    <table class="table table-responsive table-hover">
+        <tr>
+            <th>№</th>
+            <th>Название вопроса</th>
+            <th>Ответ №1</th>
+            <th>Ответ №2</th>
+            <th>Ответ №3</th>
+            <th>Ответ №4</th>
+            <th>Ответ №5</th>
+            <th>Ответ №6</th>
+            <th></th>
+
+        </tr>
+        {% for article in pagination %}
+            <tr>
+                <td><span class="badge badge-dark" data-userid="{{ article.getNkey() }}">{{ article.getNkey() }}</span></td>
+                <td>{{ article.getCquestion()  }}</td>
+                <td>{{ article.getCanswer1() }}</td>
+                <td>{{ article.getCanswer2() }}</td>
+                <td>{{ article.getCanswer3() }}</td>
+                <td>{{ article.getCanswer4() }}</td>
+                <td>{{ article.getCanswer5() }}</td>
+                <td>{{ article.getCanswer6() }}</td>
+                <td style="display: none">{{ article.getNw1() }}</td>
+                <td style="display: none">{{ article.getNw2() }}</td>
+                <td style="display: none">{{ article.getNw3() }}</td>
+                <td style="display: none">{{ article.getNw4() }}</td>
+                <td style="display: none">{{ article.getNw5() }}</td>
+                <td style="display: none">{{ article.getNw6() }}</td>
+                <td style="width: 10%" colspan="2"><button type="button" class="mt-2 btn btn-warning btn-sm" data-toggle="modal" data-target="#changeWindow">изменить</button><button type="button" class=" mt-2 btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteWindow">удалить</button></td></td>
+
+            </tr>
+        {% endfor %}
+    </table>
+    <div class="row-pagination">
+        <nav aria-label="pagination">
+            {{ knp_pagination_render(pagination) }}
+        </nav>
+    </div>
+</div>
+    <div id="deleteWindow" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Вы действительно хотите удалить вопрос?</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Вся информация будет удалена из системы. Восстановить данные невозможно.</p>
+                </div>
+                <form action="{{ path("admin.deleteAction", {'idTest' : 0}) }}" method="get">
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger mr-auto">УДАЛИТЬ</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="changeWindow" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document" style="max-width: 1000px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalLabel">Изменить описание вопроса:</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-header">
+                    <h4 id="questionDesc"></h4>
+                </div>
+                <form action="{{ path("admin.saveAction", {"idTest" : test.nkey }) }}" method="post">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="number" class="form-control disabled" id="id" name="id" readonly>
+                        </div>
+                            <div class="form-group">
+                                <label for="nameQuestion" class="font-weight-bold">Название вопроса:</label>
+                                <textarea placeholder="введите название вопроса..." class="form-control" name="nameQuestion" id="nameQuestion" cols="30" rows="5"></textarea>
+                            </div>
+                       <div class="container-fluid">
+                           <div class="row">
+                               <div class="col-md-6">
+                                   <div class="form-group ">
+                                       <label for="answer1" class="font-weight-bold">Ответ №1:</label>
+                                       <input type="text" class="form-control" id="answer1" name="answer1">
+                                       <div class="input-group input-group-btn">
+                                           <span class="input-group-addon">баллы:</span>
+                                       <input type="number" class="form-control" id="ballAnswer1" name="ballAnswer1">
+                                       </div>
+                                   </div>
+                                   <div class="form-group border-dark">
+                                       <label for="answer2" class="font-weight-bold">Ответ №2:</label>
+                                       <input type="text" class="form-control" id="answer2" name="answer2">
+                                       <div class="input-group input-group-btn">
+                                           <span class="input-group-addon">баллы:</span>
+                                       <input type="number" class="form-control" id="ballAnswer2" name="ballAnswer2">
+                                       </div>
+                                   </div>
+                                   <div class="form-group">
+                                       <label for="answer3" class="font-weight-bold">Ответ №3:</label>
+                                       <input type="text" class="form-control" id="answer3" name="answer3">
+                                       <div class="input-group input-group-btn">
+                                           <span class="input-group-addon">баллы:</span>
+                                       <input type="number" class="form-control" id="ballAnswer3" name="ballAnswer3">
+                                       </div>
+                                   </div>
+                               </div>
+                               <div class="col-md-6">
+                                   <div class="form-group">
+                                       <label for="answer4" class="font-weight-bold">Ответ №4:</label>
+                                       <input type="text" class="form-control" id="answer4" name="answer4">
+                                       <div class="input-group input-group-btn">
+                                           <span class="input-group-addon">баллы:</span>
+                                       <input type="number" class="form-control" id="ballAnswer4" name="ballAnswer4">
+                                       </div>
+                                   </div>
+                                   <div class="form-group">
+                                       <label for="answer5" class="font-weight-bold">Ответ №5:</label>
+                                       <input type="text" class="form-control" id="answer5" name="answer5">
+                                       <div class="input-group input-group-btn">
+                                           <span class="input-group-addon">баллы:</span>
+                                           <input type="number" class="form-control" id="ballAnswer5" name="ballAnswer5">
+                                       </div>
+                                   </div>
+                                   <div class="form-group">
+                                       <label for="answer6" class="font-weight-bold">Ответ №6:</label>
+                                       <input type="text" class="form-control" id="answer6" name="answer6">
+                                       <div class="input-group input-group-btn">
+                                           <span class="input-group-addon">баллы:</span>
+                                           <input type="number" class="form-control" id="ballAnswer6" name="ballAnswer6">
+                                       </div>
+                                   </div>
+                               </div>
+                       </div>
+                       </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success mr-auto">Сохранить</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="scalWindow" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document" style="max-width: 1000px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="exampleModalLabel">Настройка шкал:</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ path("admin.saveScal", {'idTest' : test.nkey }) }}" method="post">
+                    <div class="modal-body">
+                        <div class="container">
+
+                            <div class="row">
+                                {% for key, value in scals %}
+                                <div class="col-md-6 mb-4">
+                                    <div class="row">
+                                        <h5>Шкала {{ key + 1 }}</h5>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">шкала позиционируется в интервале</div>
+                                        <div class="col-md-4">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">от</span>
+                                                <input class="form-control" type="number" name="{{ "nmin#{key + 1}" }}" value="{{ value['nmin'] | default(0) }}">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">до</span>
+                                                <input class="form-control" type="number" name="{{ "nmax#{key + 1}" }}" value="{{ value['nmax'] | default(0) }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-12">
+                                            <textarea name="{{ "value#{key + 1}" }}" class="form-control">{{ value['value'] }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success mr-auto">Сохранить</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

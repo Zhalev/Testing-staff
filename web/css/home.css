@@ -1,0 +1,35 @@
+.main {
+    margin-top: 50px;
+}
+.navbar__text, .card-title__text {
+    font: 20px/1.5 Arial;
+}
+.card-img__size {
+    width: 100px;
+    height: 100px;
+}
+.card__none-radius {
+    border-radius: 0;
+}
+.list-group-item:first-child {
+    border-top-right-radius: 0;
+}
+.row-pagination {
+    margin-top: 10px;
+}
+.instruction {
+    margin: auto;
+    width: 50%;
+    outline: 1px solid;
+}
+.form-control_without-border-radius {
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+}
+.filter {
+    margin-bottom: 2%;
+}
+.table_font-15 {
+    font-size: 15px;
+}

@@ -1,0 +1,91 @@
+{% extends 'layout/base.html.twig' %}
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+
+        $(function () {
+            $('.radio').change(function() {
+                $('.radio').not(this).prop('checked', false);
+            });
+
+        });
+
+        var $submit = $('#submit');
+        $checkbox = $('input[type=checkbox]');
+        $radio = $('input[type=radio]');
+
+        $submit.prop('disabled', true);
+
+        $checkbox.on('click', function(){
+            if ($("input:checkbox:checked").length > 0) {
+                $submit.removeAttr('disabled');
+            }else{
+                $submit.prop('disabled', true);
+            }
+        });
+
+        $radio.on('click', function(){
+            if ($("input:radio:checked").length > 0) {
+                $submit.removeAttr('disabled');
+            }else{
+                $submit.prop('disabled', true);
+            }
+        });
+    </script>
+
+{% endblock %}
+{% block _nav %}
+{% endblock %}
+{% block content %}
+    <style>
+        .form-check {
+            font-size: 130%;
+            padding: 1%;
+        }
+        .form-check input {
+            width: 30px;
+            height: 30px;
+        }
+    </style>
+    <div class="container-fluid mt-4">
+        <div class="row">
+                    <div class="col-md-10">
+                        <p style="font-size: 110%">Вы проходите тест: {{ test.getCtestname() }}</p>
+                    </div>
+                    <div class="col-md-2">
+                        <a class="btn btn-warning btn-lg btn-block" href="{{ path('go.finishAction') }}">завершить тест</a>
+                    </div>
+        </div>
+        <form action="{{ path("go.testAction", {'test' : test.nkey, 'idQuestion' : nextQuestion }) }}" method="post">
+           <div class="row mb-5 mt-5">
+                <div class="col-md-12">
+                    <p style="font-size: 110%">Вопрос: {{ currentNumberQuestion + 1}} / {{ maxQuestions + 1 }}</p>
+                    <hr>
+                    <h2>{{ question.cquestion }}</h2>
+                </div>
+
+                <div class="col-md-12">
+                       {% if question.bdostup %}
+                           {{ include(':go:radio.html.twig') }}
+                       {% else %}
+                           {{ include(':go:checkbox.html.twig') }}
+                       {% endif %}
+                </div>
+           </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-9">
+
+                        </div>
+                        <div class="col-md-3">
+                                    <button id="submit" class="btn btn-primary btn-lg btn-block" type="submit">следующий вопрос</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

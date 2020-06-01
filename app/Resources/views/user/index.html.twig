@@ -1,0 +1,233 @@
+{% extends 'layout/base.html.twig' %}
+{% block javascripts %}
+{{ parent() }}
+    <script>
+        $(function () {
+            $('.btn[data-target="#changeWindow"]').click(function () {
+                var siblings = $(this).parents().eq(0).siblings();
+                var id = $("#id"),
+                    login = $("#login"),
+                    firstName = $("#firstName"),
+                    lastName = $("#lastName"),
+                    middleNames = $("#middleNames"),
+                    fio = $('#fio'),
+                    org = $('#select-org'),
+                    typeAccount = $('#typeAccount');
+
+                fio.empty();
+                var elementText;
+
+
+                for (var index = 0; index < siblings.length; ++index) {
+                    elementText = siblings[index].innerText;
+                    switch (index) {
+                        case 0:
+                            id.val(elementText);
+                            break;
+                        case 1:
+                            lastName.val(elementText);
+                            break;
+                        case 2:
+                            firstName.val(elementText);
+                            break;
+                        case 3:
+                            middleNames.val(elementText);
+                            break;
+                        case 4:
+                            login.val(elementText);
+                            break;
+                        case 5:
+                            org.val(elementText);
+                            break;
+                        case 6:
+                            typeAccount.val(elementText);
+                            break;
+                    }
+                    if (index >= 1 && index <= 3) {
+                        fio.append(elementText, " ");
+                    }
+                }
+            });
+            $('.btn[data-target="#deleteWindow"]').click(function() {
+                var siblings = $(this).parents().eq(0).siblings();
+                $('#deleteWindow form').attr('action', "/users/" + siblings[0].innerText + "/delete")
+
+            });
+
+            $('#addButton').click(function() {
+                var changeWindow = $("#changeWindow");
+                $('#exampleModalLabel', changeWindow).text("Добавление нового пользователя");
+                $('#fio', changeWindow).text("Пожалуйста, укажите данные пользователя");
+
+                $("#id").val(0);
+                changeWindow.modal();
+
+            });
+        })
+    </script>
+{% endblock %}
+{% block content %}
+<div class="container-fluid m-auto" >
+    <aside class="filter mt-2">
+        <div>
+            <form class="mb-2" action="{{ path("users") }}">
+                <div class="input-group">
+                    <input class="form-control" type="search" name="lastname" placeholder="фамилия" value="{{ lastName }}">
+                    <input class="form-control" type="search" name="firstname" placeholder="имя" value="{{ firstName }}">
+                    <input class="form-control" type="search" name="middlenames" placeholder="отчество" value="{{ middleNames }}">
+                    <input class="form-control" type="search" name="login" placeholder="идентификатор (логин)" value="{{ login }}">
+                    <select class="form-control" name="orgName">
+                        <option value="-1">Все организации</option>
+                        {% for org in orgs %}
+                            {% if org.nelementkey == oldOrgName %}
+                                <option selected="selected" class="form-control" value="{{ org.nelementkey }}">{{ org.celementname }}</option>
+                            {% else %}
+                                <option class="form-control" value="{{ org.nelementkey }}">{{ org.celementname }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <select class="form-control" name="keyUser">
+                        <option value="-1">Все номера (№)</option>
+                        {% for user in users %}
+                            {% if user.nuserkey == oldUserKey %}
+                                <option selected="selected" class="form-control" value="{{ user.nuserkey }}">№{{ user.nuserkey }}</option>
+                            {% else %}
+                                <option class="form-control" value="{{ user.nuserkey }}">№{{ user.nuserkey }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <span class="input-group-btn"><input class="btn btn-primary" type="submit" value="поиск"></span>
+                </div>
+            </form>
+            <p>сортировка по: {{ knp_pagination_sortable(pagination, 'возрастанию / убыванию', 'u.cuserfamilyname') }}</p>
+            <div class="mt-2">
+                <button id="addButton" class="btn btn-success" type="button">добавить пользователя</button>
+            </div>
+        </div>
+    </aside>
+    <table class="table table-responsive table-hover">
+        <tr>
+            <th>№</th>
+            <th>Фамилия</th>
+            <th>Имя</th>
+            <th>Отчество</th>
+            <th>Идентификатор (логин)</th>
+            <th>Организация</th>
+            <th>Тип учетной записи</th>
+            <th></th>
+        </tr>
+        {% for article in pagination %}
+            <tr>
+                <td><span class="badge badge-dark" data-userid="{{ article.getNuserkey() }}">{{ article.getNuserkey() }}</span></td>
+                <td>{{ article.getCuserfamilyname() }}</td>
+                <td>{{ article.getCuserfirstname() }}</td>
+                <td>{{ article.getCusersurname() }}</td>
+                <td>{{ article.getCidentificator() }}</td>
+                {% if article.getOrganization() %}
+                    <td>{{ article.getOrganization().getCelementname() }}</td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+                {% if article.getTypeAccount() %}
+                    <td>{{ article.getTypeAccount().getCelementname() }}</td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+                <td colspan="2"><button type="button" class="mr-2 btn btn-warning btn-sm" data-toggle="modal" data-target="#changeWindow">изменить</button><button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteWindow">удалить</button></td></td>
+
+            </tr>
+        {% endfor %}
+    </table>
+    <div class="row-pagination">
+        <nav aria-label="pagination">
+            {{ knp_pagination_render(pagination) }}
+        </nav>
+    </div>
+</div>
+
+    <div id="deleteWindow" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Вы действительно хотите удалить пользователя?</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Вся информация будет удалена из системы. Восстановить данные невозможно.</p>
+                </div>
+                <form action="{{ path("user_delete", {'id' : 0}) }}" method="post">
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger mr-auto">УДАЛИТЬ</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="changeWindow" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="exampleModalLabel">Индивидуальная карта пользователя:</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-header">
+                    <h6 id="fio"></h6>
+                </div>
+                <form action="{{ path("user_save") }}" method="post">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="number" class="form-control disabled" id="id" name="id" readonly>
+                        </div>
+                            <div class="form-group">
+                                <label for="login" class="form-control-label">Идентификатор (логин):</label>
+                                <input type="text" class="form-control border-dark" id="login" name="login">
+                            </div>
+                            <div class="form-group">
+                                <label for="password" class="form-control-label">Пароль:</label>
+                                <input type="password" class="form-control border-dark" id="password" name="password">
+                            </div>
+                            <div class="form-group">
+                                <label for="login" class="form-control-label">Тип учетной записи:</label>
+                                <select name="typeAccount" id="typeAccount" class="form-control">
+                                    {% for type in typesAccount %}
+
+                                        <option value="{{ type.nelementkey }}">{{ type.celementname }}</option>
+
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName" class="form-control-label">Фамилия:</label>
+                                <input type="text" class="form-control" id="lastName" name="lastName">
+                            </div>
+                            <div class="form-group">
+                                <label for="firstName" class="form-control-label">Имя:</label>
+                                <input type="text" class="form-control" id="firstName" name="firstName">
+                            </div>
+                            <div class="form-group">
+                                <label for="middleNames" class="form-control-label">Отчество:</label>
+                                <input type="text" class="form-control" id="middleNames" name="middleNames">
+                            </div>
+                            <div class="form-group">
+                                <label for="select-org" class="form-control-label">Организация:</label>
+                                <select class="form-control" name="org" id="select-org">
+                                    {% for org in orgs %}
+                                        <option class="form-control" data-orgId={{ org.nelementkey }} value="{{ org.nelementkey }}">{{ org.celementname }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success mr-auto">Сохранить</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

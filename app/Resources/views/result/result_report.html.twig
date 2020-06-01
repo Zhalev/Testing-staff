@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Тестирование персонала</title>
+    <style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+table {
+    width: 99%;
+    margin: 0.5%;
+    border-collapse: collapse;
+    border: 1px solid #000;
+}
+th, td {
+    text-align: center;
+    border: 1px solid #000;
+    padding: 0.5%;
+}
+h4 {
+    margin-left: 0.2%;
+}
+    </style>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            window.print();
+        });
+
+    </script>
+</head>
+<body>
+<span style="float: right">дата создания: {{ "now"| date('d-m-Y H:i:s') }}</span>
+<h4 style="clear: both">Подробная информация о прохождении теста:</h4>
+<table>
+    <tr>
+        <th>Тест</th>
+        <th>Тестируемый</th>
+        <th>Дата начала</th>
+        <th>Время завершения</th>
+        <th>Кол-во набр. баллов</th>
+        <th>Кол-во макс. баллов</th>
+        <th>Результат</th>
+    </tr>
+    <tr>
+        {% for info in test %}
+            <td>{{ info.testName }}</td>
+            <td>{{ info.fio }}</td>
+            <td>{{ info.dateStart | date('d-m-Y H:i:s')}}</td>
+            <td>{{ info.dateEnd | date('d-m-Y H:i:s') }}</td>
+            <td>{{ info.pollBalls }}</td>
+            <td>{{ info.maxBalls }}</td>
+            <td>
+
+                {% if info['maxBalls'] != 0 %}
+                    {% set result =  ((info['pollBalls'] * 100) / info['maxBalls'])|round() %}
+                            {{ result }}%
+                {% endif %}
+
+            </td>
+        {% endfor %}
+    </tr>
+</table>
+<hr>
+<h4>Статистика по вопросам:</h4>
+<table>
+    <tr>
+        <th>Название вопроса</th>
+        <th>Дата ответа на вопрос</th>
+        <th>Время фиксации ответа</th>
+        <th>Кол-во полученных баллов</th>
+    </tr>
+    {% for question in questions %}
+        {% set pollBalls = question.ans1
+        + question.ans2
+        + question.ans3
+        + question.ans4
+        + question.ans5
+        + question.ans6
+        + question.ans7
+        + question.ans8
+        + question.ans9
+        + question.ans10
+        %}
+        {% set maxBalls = question.nw1
+        + question.nw2
+        + question.nw3
+        + question.nw4
+        + question.nw5
+        + question.nw6
+        + question.nw7
+        + question.nw8
+        + question.nw9
+        + question.nw10
+        %}
+        <tr>
+            <td>{{ question['question'] }}</td>
+            <td>{{ question['testDate'] | date('d-m-Y') }}</td>
+            <td>{{ question['testDate'] | date('H:i:s') }}</td>
+            <td>
+                    {% if maxBalls != 0 %}
+                        {% set result =  ((pollBalls * 100) / maxBalls)|round() %}
+                        {{ pollBalls }} / {{ maxBalls }} ({{ result }}%)
+                    {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+</body>
+</html>

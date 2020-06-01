@@ -1,0 +1,27 @@
+{% extends 'layout/base.html.twig' %}
+{% block javascripts %}
+    {{ parent() }}
+
+{% endblock %}
+{% block right_block_nav %}
+{% endblock %}
+{% block content %}
+    <div class="container mt-4">
+       <div class="row">
+           <div class="col-md-12 mb-4">
+               <h3><span class="badge badge-info">{{ test.getCtestname() }}</span></h3>
+           </div>
+           <div class="col-md-12">
+               <textarea disabled="disabled" style="font-size: 130%; font-weight: bold; line-height: 1.5"class="form-control" name="" id="" cols="30" rows="7">
+{{ test.getCmessage() }}
+           </textarea>
+           </div>
+
+           <div class="col-md-12 mt-2">
+               <a class="btn btn-warning btn-block btn-lg" href="{{ path("home") }}">отказаться</a>
+               <a class="btn btn-primary btn-block btn-lg" href="{{ path("go.startAction", {'test' : test.nkey}) }}">начать прохождение теста</a>
+           </div>
+
+       </div>
+    </div>
+{% endblock %}

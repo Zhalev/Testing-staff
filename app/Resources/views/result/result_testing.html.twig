@@ -1,0 +1,94 @@
+{% extends 'layout/base.html.twig' %}
+{% block styles %}
+    {{ parent() }}
+    <style>
+        .progress {
+            background: #2b5275;
+        }
+
+        .progress-bar {
+            font-size: 0.85rem;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="container-fluid m-auto" >
+    <aside class="filter mt-2">
+        <div>
+            <form class="mb-2" action="{{ path("resultTests") }}">
+                    <div class="input-group">
+                        <input class="form-control" type="search" name="testName" placeholder="по тесту" value="{{ testName }}">
+                        <input style="border-radius: .25rem; border-top-left-radius: 0; border-bottom-left-radius: 0;" class="form-control" type="search" name="lastName" placeholder="по фамилии пользователя" value="{{ lastName }}">
+
+                        <span class="input-group-addon ml-2" style="border-left: 1px solid rgba(0,0,0,.15); border-radius: .25rem; border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                            дата с:
+                        </span>
+                        <input style="padding: 0 .75rem;" class="form-control" type="date" name="dateStart">
+
+                        <span class="input-group-addon">
+                            дата по:
+                        </span>
+                        <input  style="padding: 0 .75rem;" class="form-control" type="date" name="dateEnd">
+
+                        <span class="input-group-btn">
+                            <input class="btn btn-primary" type="submit" value="поиск">
+                        </span>
+                    </div>
+            </form>
+                <div class="block-sort mt-2">
+                    дата прохождения: {{ knp_pagination_sortable(pagination, 'возрастанию / убыванию', 'dateStart') }}
+                    название теста: {{ knp_pagination_sortable(pagination, 'возрастанию / убыванию', 'testName') }}
+                </div>
+        </div>
+    </aside>
+
+        <table class="table table-responsive table-hover">
+            <tr>
+                <th></th>
+                <th>Название теста</th>
+                <th>Пользователь (тестируемый)</th>
+                <th>Дата прохождения теста</th>
+                <th>Время завершения теста</th>
+                <th>Кол-во набранных баллов</th>
+                <th>Кол-во максимальных баллов</th>
+                <th>Результат <sup>%</sup></th>
+            </tr>
+
+            {% for article in pagination %}
+            <tr>
+                <td><a href="{{ path('generateReport', {'testId' : article['testId']}) }}" title="создать отчет"><img src="{{ asset('img/printer.png') }}" alt="отчет"></a></td>
+                <td><a href="{{ path('admin.editAction', {'id' : article['testKey']}) }}">{{ article['testName'] }}</a></td>
+                <td>{{ article['fio'] }}</td>
+                <td><input type="date" class="form-control form-control-sm" value="{{  article['dateStart']| date('Y-m-d') }}" readonly></td>
+                <td>{{  article['dateEnd']| date('H:i:s') }}</td>
+                <td> {{ article['pollBalls'] }}</td>
+                <td> {{ article['maxBalls'] }}</td>
+                <td>
+                    <div class="progress">
+                         {% if article['maxBalls'] != 0 %}
+                             {% set result =  ((article['pollBalls'] * 100) / article['maxBalls'])|round() %}
+
+                         {% if result == 0 %}
+                             <div class="progress-bar bg-danger" role="progressbar" style="width: 100%;" aria-valuenow="{{ result }}" aria-valuemin="0" aria-valuemax="100">
+                                 {{ result }}%
+                             </div>
+                         {% else %}
+                            <div class="progress-bar" role="progressbar" style="width: {{ result }}%;" aria-valuenow="{{ result }}" aria-valuemin="0" aria-valuemax="100">
+                               {{ result }}%
+                            </div>
+                         {% endif %}
+                         {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+
+        </table>
+        <div class="row-pagination">
+            <nav aria-label="pagination">
+                {{ knp_pagination_render(pagination) }}
+            </nav>
+        </div>
+    </div>
+
+{% endblock %}

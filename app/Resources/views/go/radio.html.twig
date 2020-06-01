@@ -1,0 +1,47 @@
+{%  if question.canswer1 is not null and question.canswer2 is not empty %}
+    <div class="form-check">
+        <label for="answer1" class="form-check-label">
+            <input name="answer1" type="radio" class="form-check-input radio" id="answer1">
+            {{ question.canswer1 }}
+        </label>
+    </div>
+{% endif %}
+                        {%  if question.canswer2 is not null and question.canswer2 is not empty %}
+                            <div class="form-check">
+                                <label for="answer2" class="form-check-label">
+                                    <input name="answer2" type="radio" class="form-check-input radio" id="answer2">
+                                    {{ question.canswer2 }}
+                                </label>
+                            </div>
+                        {% endif %}
+                        {%  if question.canswer3 is not null and question.canswer3 is not empty %}
+                            <div class="form-check">
+                                <label for="answer3" class="form-check-label">
+                                    <input name="answer3" type="radio" class="form-check-input radio" id="answer3">
+                                    {{ question.canswer3 }}
+                                </label>
+                            </div>
+                        {% endif %}
+                        {%  if question.canswer4 is not null and question.canswer4 is not empty%}
+                            <div class="form-check">
+                                <label for="answer4" class="form-check-label">
+                                    <input name="answer4" type="radio" class="form-check-input radio" id="answer4">
+                                    {{ question.canswer4 }}
+                                </label>
+                            </div>
+                        {% endif %}
+                    {%  if question.canswer5 is not null and question.canswer5 is not empty %}
+                        <div class="form-check">
+                            <label for="answer5" class="form-check-label">
+                                <input name="answer5" type="radio" class="form-check-input radio" id="answer5">
+                                {{ question.canswer5 }}
+                            </label>
+                        </div>
+                    {% endif %}
+                    {%  if question.canswer6 is not null and question.canswer6 is not empty%}
+                        <div class="form-check">
+                            <label for="answer6" class="form-check-label">
+                                {{ question.canswer6 }}
+                            </label>
+                        </div>
+                    {% endif %}

@@ -1,0 +1,43 @@
+{% extends ':layout:base.html.twig' %}
+{% block _nav %}
+{% endblock %}
+{% block content %}
+<div class="container mt-1">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <a href="{{ path('home') }}"><img width="300" height="300" src="{{ asset('img/logo.png') }}" alt="Тестирование персонала"></a>
+            <p style="font-size: 120%">{{ "#{user.cuserfirstname} #{user.cusersurname}" }}, вы прошли тест:</p>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-12 text-center">
+            <h1>&laquo;{{ test.ctestname|upper }}&raquo;</h1>
+        </div>
+    </div>
+    <hr>
+    <div class="row mt-2 alert ">
+        <div class="col-md-12 text-center" style="font-size: 120%%">
+            <p>Ваш результат:</p>
+            <div>
+                <h1 class="mt-2 mb-3" style="font-size: 500%">{{ ((userBalls * 100) / maxBalls) | round }}%</h1>
+            </div>
+            {% if userBalls is not null %}
+                <p>Вы набрали баллов: {{ userBalls }} из {{ maxBalls }}</p>
+                <p class="alert alert-info">{{ message }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-12">
+            <a href="{{ path('home') }}" class="btn btn-success btn-block btn-lg">перейти на страницу тестов</a>
+            {% if is_granted("ROLE_ADMIN") %}
+                <a href="{{ path('result') }}" class="btn btn-primary btn-block btn-lg">посмотреть статистику</a>
+            {% endif %}
+        </div>
+    </div>
+
+
+
+</div>
+
+{% endblock %}

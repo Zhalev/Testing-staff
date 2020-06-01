@@ -1,0 +1,177 @@
+{% extends 'layout/base.html.twig' %}
+{% block styles %}
+    {{ parent() }}
+    <style>
+        body {
+            background: #eee;
+        }
+        .alert-info {
+            background: #fff;
+            border: none;
+            border-bottom: 1px solid #ddd;
+        }
+        .list-group-item {
+            border: none;
+            margin-bottom: 1.1%;
+        }
+        .list-group-item:hover {
+            background: #eee;
+        }
+        .list-group-item a:first-child {
+            font-size: 120%;
+            margin-right: 1%;
+        }
+        .col-md-8 {
+            background: #fff;
+        }
+    </style>
+{% endblock %}
+{% block javascripts %}
+{{ parent() }}
+{% if is_granted("ROLE_ADMIN") %}
+    <script>
+        $(function() {
+            // $('#delete').modal('show');
+            $('.choose-select').change(function(event) {
+                event.preventDefault();
+
+                var $idOrg = $('option:selected', this).attr('data-organizationId');
+                var $idTest = $('option:selected', this).attr('data-testid');
+
+                if (!$idOrg) {
+                    return;
+                }
+
+                $.post("/home/org",
+                    {
+                        "idOrg" : $idOrg,
+                        "idTest" : $idTest,
+                    },
+                    function() {
+                        $('#changeOption').modal('show');
+                    }
+                );
+
+            });
+
+       
+        });
+    </script>
+{% endif %}
+{% endblock javascripts %}
+{% block content %}
+     <div class="row">
+            <section class="col-md-8">
+                <aside class="filter">
+
+                        <div class="alert alert-info ml-2">
+                            <form class="mb-2 d-md-inline mr-2" action="{{ path("home") }}">
+                                <div class="input-group">
+                                    <input class="form-control" type="search" name="testName" placeholder="введите название теста..." value="{{ testName }}">
+                                    <select class="form-control" name="type">
+                                        <option value="-1">Все тесты</option>
+                                        {% for type in typesTests %}
+                                            {% if type.nelementkey == typeTest %}
+                                                <option value="{{ type.nelementkey() }}" selected="selected">{{ type.celementname() }}</option>
+                                            {% else %}
+                                                <option value="{{ type.nelementkey() }}">{{ type.celementname() }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    <select class="form-control" name="organizaiton">
+                                        <option value="-1">Все учебные организации</option>
+                                        {% for organization in organizations %}
+                                            {% if organization.nelementkey == organizationId %}
+                                                <option value="{{ organization.nelementkey() }}" selected="selected">{{ organization.celementname() }}</option>
+
+                                            {% else %}
+                                                <option value="{{ organization.nelementkey() }}">{{ organization.celementname() }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    <span class="input-group-btn"><input class="btn btn-primary" type="submit" value="поиск"></span>
+                                </div>
+                            </form>
+                            <div class="row">
+                                <div class="col-md-10">по названию: {{ knp_pagination_sortable(pagination, 'возрастанию / убыванию', 't.ctestname') }}</div>
+                                <div class="col-md-2 text-right"><a href="{{ path("tests_import") }}">импорт</a></div>
+                            </div>
+                        </div>
+                {% for article in pagination %}
+                    <li class="list-group-item">
+                        <a href="{{ path("go", {"id" : article.getNkey() })}}">{{ article.getCtestname() }}</a>
+                        <a href="{{ path("go", {"id" : article.getNkey() })}}"><span id="delete" class="badge badge-primary mr-2">пройти</span></a>
+                       {% if is_granted("ROLE_ADMIN") %}
+                           <a href="{{ path("admin.editAction", {"id" : article.getNkey() }) }}"><span class="badge badge-warning">редактировать</span></a>
+                           <a href="{{ path("test_delete", {"id" : article.getNkey() }) }}"><span class="badge badge-danger">удалить</span></a>
+                           <a href="{{ path("test_export", {"id" : article.getNkey() }) }}"><span class="badge badge-secondary">экспорт</span></a>
+                       {% elseif is_granted("ROLE_MODERATOR") and article.organization and article.organization.nelementkey == user.organization.nelementkey %}
+                           <a href="{{ path("admin.editAction", {"id" : article.getNkey() }) }}"><span class="badge badge-warning">редактировать</span></a>
+                           <a href="{{ path("test_delete", {"id" : article.getNkey() }) }}"><span class="badge badge-danger">удалить</span></a>
+                       {% endif %}
+                        <span class="badge bg-dark float-right">{{ article.getTypeTest().getCelementname() | default('') }}</span>
+                        <p class="post-desc"><small>{{ article.getCmessage() }}</small></p>
+                        {% if is_granted("ROLE_ADMIN") %}
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-addon">учебная организация:</span>
+                                <select class="choose-select form-control">
+                                    {% set flag = false %}
+                                    {% for organization in organizations %}
+                                        {% if organization.getCelementname() == article.getOrganization().getCelementname() | default("") %}
+                                            <option data-testid="{{ article.getNkey() }}" data-organizationId="{{ organization.getNelementkey() }}" value="{{ organization.getCelementname() }}" selected="selected">{{ organization.getCelementname() }}</option>
+                                            {% set flag = true %}
+                                        {% else %}
+                                            <option data-testid="{{ article.getNkey() }}" data-organizationId="{{ organization.getNelementkey() }}" value="{{ organization.getCelementname() }}">{{ organization.getCelementname() }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not flag %}
+                                        <option selected="selected">не выбрана</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+                <div class="row-pagination">
+                    <nav aria-label="pagination">
+                        {{ knp_pagination_render(pagination) }}
+                    </nav>
+                </div></aside>
+            </section>
+                <section class="col-md-4">
+                    <aside class="card text-white bg-dark mb-3 card__none-radius">
+                        <header class="card-header">
+                            <h5 class="card-title text-center card-title__text">Индивидуальная карта</h5>
+                        </header>
+                        <footer class="card-body">
+                            <h6 class="card-title">{{ "#{user.cuserfirstname} #{user.cusersurname} #{user.cuserfamilyname}"}}:</h6>
+                            <ul class="list-group list-group-flush">
+                                {% if user.organization is not null%}
+                                <li class="list-group-item bg-dark">Организация: {{ user.organization.celementname}}</li>
+                                {% endif %}
+                                {% if is_granted("ROLE_ADMIN") %}
+                                    <li class="list-group-item bg-dark">Тип пользователя: администратор</li>
+                                {% elseif is_granted("ROLE_MODERATOR") %}
+                                    <li class="list-group-item bg-dark">Тип пользователя: администратор ЯО</li>
+                                {% else %}
+                                    <li class="list-group-item bg-dark">Тип пользователя: тестируемый</li>
+                                {% endif %}
+                            </ul>
+                            <div class="card-body">
+                                <a href="{{ path("logout") }}" class="card-link">выйти</a>
+                            </div>
+                        </footer>
+                    </aside>
+                </section>
+        </div>
+    </main>
+
+    <div id="changeOption" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content p-4">
+                <h4>Учебная организация у теста успешно изменена</h4>
+            </div>
+        </div>
+    </div>
+{% endblock %}

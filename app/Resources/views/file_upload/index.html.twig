@@ -1,0 +1,19 @@
+
+{% block title %}Hello FileUploadController!{% endblock %}
+
+{% block body %}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            {% if (label == 'notice') %}
+                <div class="alert alert-danger">{ message|raw }</div>
+            {% else %}
+                <div  class="alert alert-success">{ message|raw }</div>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    { form_start(form, {'action': path('file_upload')}) }
+    { form_widget(form) }
+    <input type="submit" value="Upload">
+    { form_end(form) }
+
+{% endblock %}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тестирование персонала</title>
+    <link rel="stylesheet" href="{{ asset("css/bootstrap.min.css") }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+
+        @media (min-width: 1200px) {
+            .container{
+                max-width: 25%;
+            }
+        }
+        .control-label_settings {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .checkbox-inline_right {
+            float: right;
+        }
+        .form_group_wrapper {
+            overflow: hidden;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    {% if error %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-warning">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row ">
+        <div class="col-md-12 text-center">
+            <a href="{{ path('login') }}" title=""><img style="max-width: 100%" src="{{ asset("img/logo.png") }}" alt="Тестирование персонала"></a>
+        </div>
+    </div>
+    <form action="{{ path("login") }}" method="post" class="form-horizontal">
+        <fieldset class="form-group">
+            <label for="login" class="control-label_settings">Идентификатор учетной записи:</label>
+            <input name="_username" type="text" id="login" class="form-control form-control_size" placeholder="идентификатор, выданный организацией" value="{{ lastUserName }}">
+        </fieldset>
+        <fieldset class="form-group">
+            <label for="password" class="control-label_settings">Пароль</label>
+            <input name="_password" type="password" id="password" class="form-control form-control_size" placeholder="пароль">
+        </fieldset>
+        <fieldset class="form-group form_group_wrapper">
+            <button type="submit" class="btn btn-primary btn-block btn-lg">Войти</button>
+        </fieldset>
+    </form>
+</div>
+</body>
+</html>

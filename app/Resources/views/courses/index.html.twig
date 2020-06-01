@@ -1,0 +1,136 @@
+{% extends 'layout/base.html.twig' %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(function () {
+            $('#addButton').click(function() {
+                var changeWindow = $("#changeWindow");
+                $('#exampleModalLabel', changeWindow).text("Добавление нового курса");
+                $('#titleCourse', changeWindow).text("Пожалуйста, укажите название курса");
+
+                $("#id").val(0);
+                changeWindow.modal();
+
+            });
+            $('.btn[data-target="#changeWindow"]').click(function () {
+                var siblings = $(this).parents().eq(0).siblings();
+                var id = $("#id"),
+                    courseName = $("#courseName"),
+                    descCourse = $("#descCourse"),
+                    uchebOrg = $("#uchebOrg"),
+                    titleCourse = $("#titleCourse");
+
+                titleCourse.empty();
+                var elementText;
+
+
+                for (var index = 0; index < siblings.length; ++index) {
+                    elementText = siblings[index].innerText;
+                    switch (index) {
+                        case 0:
+                            id.val(elementText);
+                            break;
+                        case 1:
+                            courseName.val(elementText);
+                            break;
+                        case 2:
+                            descCourse.val(elementText);
+                            break;
+                        case 3:
+                            uchebOrg.val(elementText);
+                            break;
+                    }
+                    if (index >= 1 && index <= 3) {
+                        courseName.append(elementText, " ");
+                    }
+                }
+            });
+
+        })
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="container-fluid m-auto" >
+        <aside class="filter mt-2">
+                <div class="mt-2">
+                    <button id="addButton" class="btn btn-success" type="button">добавить курс</button>
+                </div>
+        </aside>
+
+        <table class="table table-responsive">
+            <tr>
+                <th>Учебная организация</th>
+            </tr>
+            {% for organization in organizations %}
+                {% if organization.courses is not empty %}
+                    <tr>
+                <td>{{ organization.celementname }}</td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <table class="table table-responsive" style="background: #9dde9b; max-width: 60%">
+                        <tr>
+                            <th>№ курса</th>
+                            <th>Название курса</th>
+                            <th>Описание</th>
+                            <th></th>
+                        </tr>
+                        {% for course in organization.courses %}
+                            <tr>
+                                <td><span class="badge badge-dark">{{ course.id }}</span></td>
+                                <td>{{ course.name }}</td>
+                                <td>{{ course.description }}</td>
+                                <td><button type="button" class="mr-2 btn btn-warning btn-sm" data-toggle="modal" data-target="#changeWindow">изменить</button></td></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+        <div class="row-pagination">
+        </div>
+    </div>
+    <div class="modal fade" id="changeWindow" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="exampleModalLabel">Информация о курсе:</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-header">
+                    <h6 id="titleCourse"></h6>
+                </div>
+                <form action="{{ path("courses_save") }}" method="post">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="number" class="form-control disabled" id="id" name="id" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="login" class="form-control-label">Название:</label>
+                            <input type="text" class="form-control border-dark" id="courseName" name="courseName">
+                        </div>
+                        <div class="form-group">
+                            <label for="login" class="form-control-label">Описание:</label>
+                            <input type="text" class="form-control border-dark" id="descCourse" name="descCourse">
+                        </div>
+                        <div class="form-group">
+                            <label for="login" class="form-control-label">Учебная организация:</label>
+                            <select id="uchebOrg" class="form-control" name="uchebOrg">
+                                {% for organization in organizations %}
+                                    <option value="{{ organization.nelementkey }}">{{ organization.celementname }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success mr-auto">Сохранить</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                        </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends 'layout/base.html.twig' %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(function () {
+            $('#addButton').click(function() {
+                var changeWindow = $("#changeWindow");
+                $('#exampleModalLabel', changeWindow).text("Добавление новой учебной организации");
+                $('#titleOrgName', changeWindow).text("Пожалуйста, укажите название учебной организации");
+
+                $("#id").val(0);
+                changeWindow.modal();
+
+            });
+            $('.btn[data-target="#changeWindow"]').click(function () {
+                var siblings = $(this).parents().eq(0).siblings();
+                var id = $("#id"),
+                    orgName = $("#orgName"),
+                    titleOrgName = $("#titleOrgName"),
+                    typeOrg = $("#typeOrg");
+                titleOrgName.empty();
+                var elementText;
+
+
+                for (var index = 0; index < siblings.length; ++index) {
+                    elementText = siblings[index].innerText;
+                    switch (index) {
+                        case 0:
+                            id.val(elementText);
+                            break;
+                        case 1:
+                            orgName.val(elementText);
+                            break;
+                        case 2:
+                            typeOrg.val(elementText);
+                            break;
+                    }
+                    if (index >= 1 && index <= 3) {
+                        titleOrgName.append(elementText, " ");
+                    }
+                }
+            });
+            $('.btn[data-target="#deleteWindow"]').click(function() {
+                var siblings = $(this).parents().eq(0).siblings();
+                $('#deleteWindow form').attr('action', "/organization/" + siblings[0].innerText + "/delete")
+
+            });
+        })
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="container-fluid m-auto" >
+        <aside class="filter mt-2">
+            <div>
+                <form class="mb-2" action="{{ path("organization") }}">
+                    <div class="input-group">
+                        <input class="form-control" type="search" name="orgName" placeholder="название организации" value="{{ orgName }}">
+                        <select class="form-control" name="typeOrg">
+                        {% for key, value in uiTypes%}
+                            {% if typeOrg == key %}
+                                <option selected="selected" value="{{ key }}">{{ value }}</option>
+                            {% else %}
+                                <option value="{{ key }}">{{ value }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                       <span class="input-group-btn"><input class="btn btn-primary" type="submit" value="поиск"></span>
+                    </div>
+
+                </form>
+                <p>сортировка по: {{ knp_pagination_sortable(pagination, 'возрастанию / убыванию', 'ds.celementname') }}</p>
+                <div class="mt-2">
+                    <button id="addButton" class="btn btn-success" type="button">добавить организацию</button>
+                </div>
+
+            </div>
+        </aside>
+        <table class="table table-responsive">
+            <tr>
+                <th>№</th>
+                <th>Организация</th>
+                <th>Тип организации</th>
+                <th></th>
+            </tr>
+            {% for organization in pagination %}
+                <tr>
+                    <td><span class="badge badge-dark" data-userid="{{ organization.getNelementkey() }}">{{ organization.getNelementkey() }}</span></td>
+                    <td>{{ organization.getCelementname() }}</td>
+                    {% if organization.nparentkey == 310 %}
+                        <td>{{ "Учебная" }}</td>
+                    {% elseif organization.nparentkey == 300 %}
+                        <td>{{ "ЯО" }}</td>
+                    {% else %}
+                        <td>{{ "Не указана"  }}</td>
+                    {% endif %}
+                    <td colspan="2"><button type="button" class="mr-2 btn btn-warning btn-sm" data-toggle="modal" data-target="#changeWindow">изменить</button><button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteWindow">удалить</button></td></td>
+
+                </tr>
+            {% endfor %}
+        </table>
+        <div class="row-pagination">
+            <nav aria-label="pagination">
+                {{ knp_pagination_render(pagination) }}
+            </nav>
+        </div>
+    </div>
+
+    <div id="deleteWindow" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Вы действительно хотите удалить организацию?</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Вся информация будет удалена из системы. Восстановить данные невозможно.</p>
+                </div>
+                <form action="{{ path("organization_delete", {'id' : 0}) }}" method="post">
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger mr-auto">УДАЛИТЬ</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="changeWindow" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="exampleModalLabel">Информация об организации:</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-header">
+                    <h6 id="titleOrgName"></h6>
+                </div>
+                <form action="{{ path("organization_save") }}" method="post">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="number" class="form-control disabled" id="id" name="id" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="login" class="form-control-label">Название:</label>
+                            <input type="text" class="form-control border-dark" id="orgName" name="orgName">
+                        </div>
+                        <div class="form-group">
+                            <label for="login" class="form-control-label">Тип организации:</label>
+                            <select id="typeOrg" class="form-control" name="typeOrg">
+                                {% for key, value in uiTypes if key != '-1' %}
+                                    {% if typeOrg == key %}
+                                        <option selected="selected" value="{{ key }}">{{ value }}</option>
+                                    {% else %}
+                                        <option value="{{ key }}">{{ value }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success mr-auto">Сохранить</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

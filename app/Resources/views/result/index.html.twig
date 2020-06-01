@@ -1,0 +1,110 @@
+{% extends 'layout/base.html.twig' %}
+{% block content %}
+    <div class="container-fluid m-auto" >
+    <aside class="filter mt-2">
+        <div>
+            <form class="mb-2" action="{{ path("result") }}">
+                    <div class="input-group">
+                        <input class="form-control" type="search" name="nameQuestion" placeholder="по названию вопроса" value="{{ nameQuestion }}">
+                        <input class="form-control" type="search" name="lastName" placeholder="по фамилии пользователя" value="{{ lastName }}">
+                        <input style="border-radius: .25rem; border-top-left-radius: 0; border-bottom-left-radius: 0;" class="form-control" type="search" name="testName" placeholder="по тесту" value="{{ testName }}">
+
+
+                        <span class="input-group-addon ml-2" style="border-left: 1px solid rgba(0,0,0,.15); border-radius: .25rem; border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                            дата с:
+                        </span>
+                        <input style="padding: 0 .75rem;" class="form-control" type="date" name="dateStart">
+
+                        <span class="input-group-addon">
+                            дата по:
+                        </span>
+                        <input  style="padding: 0 .75rem;" class="form-control" type="date" name="dateEnd">
+
+                        <span class="input-group-btn">
+                            <input class="btn btn-primary" type="submit" value="поиск">
+                        </span>
+                    </div>
+            </form>
+                <div class="block-sort mt-2">
+                    дата прохождения: {{ knp_pagination_sortable(pagination, 'возрастанию / убыванию', 'ta.testDate') }}
+                    тесты: {{ knp_pagination_sortable(pagination, 'возрастанию / убыванию', 't.ctestname') }}
+                </div>
+        </div>
+    </aside>
+
+        <table class="table table-responsive">
+            <tr>
+                <th>№</th>
+                <th>Название вопроса</th>
+                <th>Пользователь (тестируемый)</th>
+                <th>Проходимый тест</th>
+                <th>Дата ответа на вопрос</th>
+                <th>Время прохождения</th>
+                <th>Кол-во полученных баллов</th>
+            </tr>
+
+            {% for article in pagination %}
+                {% set pollBalls = article.ans1
+                + article.ans2
+                + article.ans3
+                + article.ans4
+                + article.ans5
+                + article.ans6
+                + article.ans7
+                + article.ans8
+                + article.ans9
+                + article.ans10
+                %}
+                {% set maxBalls = article.nw1
+                + article.nw2
+                + article.nw3
+                + article.nw4
+                + article.nw5
+                + article.nw6
+                + article.nw7
+                + article.nw8
+                + article.nw9
+                + article.nw10
+
+
+                %}
+            <tr>
+                <td><span class="badge badge-dark">{{ article.nkey }}</span></td>
+                <td>{{ article.question }}</td>
+                <td>{{ article.fio }}</td>
+                <td>{{ article.testName}}</td>
+                {% if article.testDate %}
+                    <td><input class="form-control form-control-sm" type="date" value="{{ article.testDate| date('Y-m-d') }}" readonly></td>
+                {% else %}
+                    <td>даты нет</td>
+                {% endif %}
+                <td>{{ article.testDate| date('H:i:s') }}</td>
+                <td>
+                    <div class="progress">
+                         {% if maxBalls != 0 %}
+                             {% set result =  ((pollBalls * 100) / maxBalls)|round() %}
+
+                         {% if result == 0 %}
+                             <div class="progress-bar bg-danger" role="progressbar" style="width: 100%;" aria-valuenow="{{ result }}" aria-valuemin="0" aria-valuemax="100">
+                                 {{ pollBalls }} / {{ maxBalls }} ({{ result }}%)
+                             </div>
+                         {% else %}
+                            <div class="progress-bar" role="progressbar" style="width: {{ result }}%;" aria-valuenow="{{ result }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ pollBalls }} / {{ maxBalls }} ({{ result }}%)
+                            </div>
+                         {% endif %}
+                         {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+
+        </table>
+        <div class="row-pagination">
+            <nav aria-label="pagination">
+                {{ knp_pagination_render(pagination) }}
+            </nav>
+        </div>
+    </div>
+
+{% endblock %}
